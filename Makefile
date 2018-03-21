@@ -2,7 +2,6 @@ default: fmt vet errcheck test
 
 test:
 	go test -v -timeout 90s -race
-
 vet:
 	go vet ./...
 

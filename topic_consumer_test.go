@@ -42,16 +42,13 @@ func failOnErr(t *testing.T, err error) {
 }
 
 func TestTopicConsumer(t *testing.T) {
-	server, err := NewKafkaTestServer(t)
-	failOnErr(t, err)
-	server.Up()
-
 	conf := NewConfig()
 	conf.Version = V0_10_0_0
 	conf.Producer.Partitioner = NewManualPartitioner
 	conf.Producer.Return.Successes = true
-	// conf.Consumer.Offsets.Initial = OffsetOldest
-	client, err := NewClient([]string{server.Address()}, conf)
+	brokers := []string{"localhost:9092", "localhost:9091"}
+
+	client, err := NewClient(brokers, conf)
 	failOnErr(t, err)
 
 	p, err := NewSyncProducerFromClient(client)
@@ -84,20 +81,15 @@ func TestTopicConsumer(t *testing.T) {
 	}
 
 	failOnErr(t, consumer.Close())
-	server.Down()
 }
 
 func TestTopicConsumerSettingOffsets(t *testing.T) {
-	server, err := NewKafkaTestServer(t)
-	failOnErr(t, err)
-
-	server.Up()
-
 	conf := NewConfig()
 	conf.Version = V0_10_0_0
 	conf.Producer.Partitioner = NewManualPartitioner
 	conf.Producer.Return.Successes = true
-	client, err := NewClient([]string{server.Address()}, conf)
+	brokers := []string{"localhost:9092", "localhost:9091"}
+	client, err := NewClient(brokers, conf)
 	failOnErr(t, err)
 
 	p, err := NewSyncProducerFromClient(client)
@@ -135,5 +127,4 @@ func TestTopicConsumerSettingOffsets(t *testing.T) {
 	}
 
 	failOnErr(t, consumer.Close())
-	server.Down()
 }
