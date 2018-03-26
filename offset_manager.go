@@ -390,7 +390,6 @@ func (pom *partitionOffsetManager) closeLoop(done chan none) bool {
 		case <-time.After(time.Second * 5):
 			Logger.Printf("client/offsetManager offset commit timeout on shutdown! Not commited group=%s topic=%s partition=%d offset=%d\n", pom.parent.group, pom.topic, pom.partition, pom.offset)
 			pom.clean.Signal()
-			close(pom.dying)
 			timeouted = true
 		case <-done:
 			return timeouted
@@ -411,6 +410,7 @@ func (pom *partitionOffsetManager) AsyncClose() {
 			}()
 			timeouted = pom.closeLoop(done)
 		}
+		close(pom.dying)
 	}()
 }
 
