@@ -13,7 +13,6 @@ func initOffsetManager(t *testing.T) (om OffsetManager,
 	config.Metadata.Retry.Max = 1
 	config.Consumer.Offsets.CommitInterval = 1 * time.Millisecond
 	config.Version = V0_9_0_0
-	config.Group.AutoCommit = false
 
 	broker = NewMockBroker(t, 1)
 	coordinator = NewMockBroker(t, 2)
