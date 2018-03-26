@@ -13,6 +13,7 @@ func initOffsetManager(t *testing.T) (om OffsetManager,
 	config.Metadata.Retry.Max = 1
 	config.Consumer.Offsets.CommitInterval = 1 * time.Millisecond
 	config.Version = V0_9_0_0
+	config.Group.AutoCommit = false
 
 	broker = NewMockBroker(t, 1)
 	coordinator = NewMockBroker(t, 2)
@@ -450,7 +451,6 @@ func TestForcedCommitsWithoutAutoCommit(t *testing.T) {
 	}
 	coordinator.setHandler(handler)
 
-	pom.MarkOffset(100, "modified_meta")
 	time.Sleep(3 * time.Second)
 
 	safeClose(t, pom)
@@ -460,7 +460,7 @@ func TestForcedCommitsWithoutAutoCommit(t *testing.T) {
 	coordinator.Close()
 
 	if totalNumberOfCommitRequests != 0 {
-		t.Errorf("Error - commiting without autocommit")
+		t.Errorf("Error - commiting without autocommit %v", totalNumberOfCommitRequests)
 	}
 }
 

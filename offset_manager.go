@@ -449,7 +449,7 @@ func (bom *brokerOffsetManager) mainLoop() {
 	for {
 		select {
 		case <-bom.forcedTimer.C:
-			if len(bom.subscriptions) > 0 && !bom.autoCommit {
+			if len(bom.subscriptions) > 0 && bom.autoCommit {
 				for s := range bom.subscriptions {
 					s.lock.Lock()
 					s.dirty = true
