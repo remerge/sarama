@@ -82,37 +82,53 @@ func decodeRequest(r io.Reader) (req *request, bytesRead int, err error) {
 	return req, bytesRead, nil
 }
 
+const produceCommandNumber = 0
+const fetchCommandNumber = 1
+const offsetCommandNumber = 2
+const metaCommandNumber = 3
+const offsetCommitCommandNumber = 8
+const offsetFetchCommandNumber = 9
+const consumerMetadataCommandNumber = 10
+const joinGroupCommandNumber = 11
+const heartbeatCommandNumber = 12
+const leaveGroupCommandNumber = 13
+const syncGroupCommandNumber = 14
+const describeGroupsCommandNumber = 15
+const listGroupsCommandNumber = 16
+const saslHandshakeCommandNumber = 17
+const apiVersionCommandNumber = 18
+
 func allocateBody(key, version int16) protocolBody {
 	switch key {
-	case 0:
+	case produceCommandNumber:
 		return &ProduceRequest{}
-	case 1:
+	case fetchCommandNumber:
 		return &FetchRequest{}
-	case 2:
+	case offsetCommandNumber:
 		return &OffsetRequest{Version: version}
-	case 3:
+	case metaCommandNumber:
 		return &MetadataRequest{}
-	case 8:
+	case offsetCommitCommandNumber:
 		return &OffsetCommitRequest{Version: version}
-	case 9:
+	case offsetFetchCommandNumber:
 		return &OffsetFetchRequest{}
-	case 10:
+	case consumerMetadataCommandNumber:
 		return &ConsumerMetadataRequest{}
-	case 11:
+	case joinGroupCommandNumber:
 		return &JoinGroupRequest{}
-	case 12:
+	case heartbeatCommandNumber:
 		return &HeartbeatRequest{}
-	case 13:
+	case leaveGroupCommandNumber:
 		return &LeaveGroupRequest{}
-	case 14:
+	case syncGroupCommandNumber:
 		return &SyncGroupRequest{}
-	case 15:
+	case describeGroupsCommandNumber:
 		return &DescribeGroupsRequest{}
-	case 16:
+	case listGroupsCommandNumber:
 		return &ListGroupsRequest{}
-	case 17:
+	case saslHandshakeCommandNumber:
 		return &SaslHandshakeRequest{}
-	case 18:
+	case apiVersionCommandNumber:
 		return &ApiVersionsRequest{}
 	}
 	return nil
