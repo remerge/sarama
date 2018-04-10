@@ -367,7 +367,6 @@ func (client *client) RefreshMetadata(topics ...string) error {
 func (client *client) GetOffsets(topic string) (earliestMap OffsetMap, latestMap OffsetMap, err error) {
 	earliestMap = make(OffsetMap)
 	latestMap = make(OffsetMap)
-	// TODO : optimize to get this earliest and latest with one kafka call
 	partitions, err := client.Partitions(topic)
 	if err != nil {
 		return nil, nil, err
