@@ -249,35 +249,35 @@ func (b *MockBroker) handleRequests(conn net.Conn, idx int, wg *sync.WaitGroup) 
 func (b *MockBroker) getRequestType(req *request) int {
 	switch req.body.(type) {
 	case *ProduceRequest:
-		return produceCommandNumber
+		return apiKeyProduce
 	case *FetchRequest:
-		return fetchCommandNumber
+		return apiKeyFetch
 	case *OffsetRequest:
-		return offsetCommandNumber
+		return apiKeyListOffsets
 	case *MetadataRequest:
-		return metaCommandNumber
+		return apiKeyMetadata
 	case *OffsetCommitRequest:
-		return offsetCommitCommandNumber
+		return apiKeyOffsetCommit
 	case *OffsetFetchRequest:
-		return offsetFetchCommandNumber
+		return apiKeyOffsetFetch
 	case *ConsumerMetadataRequest:
-		return consumerMetadataCommandNumber
+		return apiKeyFindCoordinator
 	case *JoinGroupRequest:
-		return joinGroupCommandNumber
+		return apiKeyJoinGroup
 	case *HeartbeatRequest:
-		return heartbeatCommandNumber
+		return apiKeyHeartbeat
 	case *LeaveGroupRequest:
-		return leaveGroupCommandNumber
+		return apiKeyLeaveGroup
 	case *SyncGroupRequest:
-		return syncGroupCommandNumber
+		return apiKeySyncGroup
 	case *DescribeGroupsRequest:
-		return describeGroupsCommandNumber
+		return apiKeyDescribeGroups
 	case *ListGroupsRequest:
-		return listGroupsCommandNumber
+		return apiKeyListGroups
 	case *SaslHandshakeRequest:
-		return saslHandshakeCommandNumber
+		return apiKeySaslHandshake
 	case *ApiVersionsRequest:
-		return apiVersionCommandNumber
+		return apiKeyApiVersions
 	default:
 		b.t.Errorf("Unknown request %v", reflect.TypeOf(req.body).Elem().Name())
 		return -1
@@ -287,33 +287,33 @@ func (b *MockBroker) getRequestType(req *request) int {
 func (b *MockBroker) getResponseType(res encoder) int {
 	switch res.(type) {
 	case *ProduceResponse:
-		return produceCommandNumber
+		return apiKeyProduce
 	case *FetchResponse:
-		return fetchCommandNumber
+		return apiKeyFetch
 	case *OffsetResponse:
-		return offsetCommandNumber
+		return apiKeyListOffsets
 	case *MetadataResponse:
-		return metaCommandNumber
+		return apiKeyMetadata
 	case *OffsetCommitResponse:
-		return offsetCommitCommandNumber
+		return apiKeyOffsetCommit
 	case *OffsetFetchResponse:
-		return offsetFetchCommandNumber
+		return apiKeyOffsetFetch
 	case *ConsumerMetadataResponse:
-		return consumerMetadataCommandNumber
+		return apiKeyFindCoordinator
 	case *JoinGroupResponse:
-		return joinGroupCommandNumber
+		return apiKeyJoinGroup
 	case *HeartbeatResponse:
-		return heartbeatCommandNumber
+		return apiKeyHeartbeat
 	case *SyncGroupResponse:
-		return syncGroupCommandNumber
+		return apiKeySyncGroup
 	case *LeaveGroupResponse:
-		return leaveGroupCommandNumber
+		return apiKeyLeaveGroup
 	case *ListGroupsResponse:
-		return listGroupsCommandNumber
+		return apiKeyListGroups
 	case *DescribeGroupsResponse:
-		return describeGroupsCommandNumber
+		return apiKeyDescribeGroups
 	case *ApiVersionsResponse:
-		return apiVersionCommandNumber
+		return apiKeyApiVersions
 	default:
 		return -1
 	}

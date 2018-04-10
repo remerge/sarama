@@ -82,53 +82,53 @@ func decodeRequest(r io.Reader) (req *request, bytesRead int, err error) {
 	return req, bytesRead, nil
 }
 
-const produceCommandNumber = 0
-const fetchCommandNumber = 1
-const offsetCommandNumber = 2
-const metaCommandNumber = 3
-const offsetCommitCommandNumber = 8
-const offsetFetchCommandNumber = 9
-const consumerMetadataCommandNumber = 10
-const joinGroupCommandNumber = 11
-const heartbeatCommandNumber = 12
-const leaveGroupCommandNumber = 13
-const syncGroupCommandNumber = 14
-const describeGroupsCommandNumber = 15
-const listGroupsCommandNumber = 16
-const saslHandshakeCommandNumber = 17
-const apiVersionCommandNumber = 18
+const apiKeyProduce = 0
+const apiKeyFetch = 1
+const apiKeyListOffsets = 2
+const apiKeyMetadata = 3
+const apiKeyOffsetCommit = 8
+const apiKeyOffsetFetch = 9
+const apiKeyFindCoordinator = 10
+const apiKeyJoinGroup = 11
+const apiKeyHeartbeat = 12
+const apiKeyLeaveGroup = 13
+const apiKeySyncGroup = 14
+const apiKeyDescribeGroups = 15
+const apiKeyListGroups = 16
+const apiKeySaslHandshake = 17
+const apiKeyApiVersions = 18
 
 func allocateBody(key, version int16) protocolBody {
 	switch key {
-	case produceCommandNumber:
+	case apiKeyProduce:
 		return &ProduceRequest{}
-	case fetchCommandNumber:
+	case apiKeyFetch:
 		return &FetchRequest{}
-	case offsetCommandNumber:
+	case apiKeyListOffsets:
 		return &OffsetRequest{Version: version}
-	case metaCommandNumber:
+	case apiKeyMetadata:
 		return &MetadataRequest{}
-	case offsetCommitCommandNumber:
+	case apiKeyOffsetCommit:
 		return &OffsetCommitRequest{Version: version}
-	case offsetFetchCommandNumber:
+	case apiKeyOffsetFetch:
 		return &OffsetFetchRequest{}
-	case consumerMetadataCommandNumber:
+	case apiKeyFindCoordinator:
 		return &ConsumerMetadataRequest{}
-	case joinGroupCommandNumber:
+	case apiKeyJoinGroup:
 		return &JoinGroupRequest{}
-	case heartbeatCommandNumber:
+	case apiKeyHeartbeat:
 		return &HeartbeatRequest{}
-	case leaveGroupCommandNumber:
+	case apiKeyLeaveGroup:
 		return &LeaveGroupRequest{}
-	case syncGroupCommandNumber:
+	case apiKeySyncGroup:
 		return &SyncGroupRequest{}
-	case describeGroupsCommandNumber:
+	case apiKeyDescribeGroups:
 		return &DescribeGroupsRequest{}
-	case listGroupsCommandNumber:
+	case apiKeyListGroups:
 		return &ListGroupsRequest{}
-	case saslHandshakeCommandNumber:
+	case apiKeySaslHandshake:
 		return &SaslHandshakeRequest{}
-	case apiVersionCommandNumber:
+	case apiKeyApiVersions:
 		return &ApiVersionsRequest{}
 	}
 	return nil
