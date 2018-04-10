@@ -54,6 +54,8 @@ type Client interface {
 	// will be produced next, or a time.
 	GetOffset(topic string, partitionID int32, time int64) (int64, error)
 
+	GetOffsets(topic string) (earliestMap OffsetMap, latestMap OffsetMap, err error)
+
 	// Coordinator returns the coordinating broker for a consumer group. It will
 	// return a locally cached value if it's available. You can call
 	// RefreshCoordinator to update the cached value. This function only works on
