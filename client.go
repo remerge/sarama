@@ -3,6 +3,7 @@ package sarama
 import (
 	"math/rand"
 	"sort"
+	"strings"
 	"sync"
 	"time"
 )
@@ -108,6 +109,15 @@ type client struct {
 	cachedPartitionsResults map[string][maxPartitionIndex][]int32
 
 	lock sync.RWMutex // protects access to the maps that hold cluster state.
+}
+
+func NewClientWithID(id string, brokerList string) (Client, error) {
+	brokers := strings.Split(brokerList, ",")
+
+	config := NewConfig()
+	config.ClientID = id
+
+	return NewClient(brokers, config)
 }
 
 // NewClient creates a new Client. It connects to one of the given broker addresses
