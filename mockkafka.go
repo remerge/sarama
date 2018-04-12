@@ -1,4 +1,4 @@
-package dm
+package sarama
 
 // TODO MOVE TO REX
 
@@ -27,12 +27,12 @@ func Terminated(ms time.Duration, f func(), terminator func()) bool {
 }
 
 type MockKafka struct {
-	mb1             *sarama.MockBroker
-	mb2             *sarama.MockBroker
+	mb1             *MockBroker
+	mb2             *MockBroker
 	offset          int64
 	topic           string
 	t               *testing.T
-	requestHandlers map[string]sarama.MockResponse
+	requestHandlers map[string]MockResponse
 }
 
 func InitMockKafka(topic string, t *testing.T) *MockKafka {
@@ -41,9 +41,9 @@ func InitMockKafka(topic string, t *testing.T) *MockKafka {
 		t:     t,
 	}
 
-	k.mb1 = sarama.NewMockBroker(t, 1)
-	k.mb2 = sarama.NewMockBroker(t, 2)
-	k.requestHandlers = make(map[string]sarama.MockResponse)
+	k.mb1 = NewMockBroker(t, 1)
+	k.mb2 = NewMockBroker(t, 2)
+	k.requestHandlers = make(map[string]MockResponse)
 	k.AddMetadataResponse()
 
 	return k
@@ -53,20 +53,20 @@ func InitMockKafka(topic string, t *testing.T) *MockKafka {
 func (k *MockKafka) MockOffsetResponse(topic string, partition int32, offset int64) {
 	offsetHandler := k.requestHandlers["OffsetRequest"]
 	if offsetHandler == nil {
-		offsetHandler = sarama.NewMockOffsetResponse(k.t)
+		offsetHandler = NewMockOffsetResponse(k.t)
 	}
-	offsetHandler = offsetHandler.(*sarama.MockOffsetResponse).
-		SetOffset(topic, partition, sarama.OffsetOldest, offset).
-		SetOffset(topic, partition, sarama.OffsetNewest, offset)
+	offsetHandler = offsetHandler.(*MockOffsetResponse).
+		SetOffset(topic, partition, OffsetOldest, offset).
+		SetOffset(topic, partition, OffsetNewest, offset)
 	k.requestHandlers["OffsetRequest"] = offsetHandler
 
 	k.mb2.SetHandlerByMap(k.requestHandlers)
 }
 
 func (k *MockKafka) AddMetadataResponse() {
-	mdr := new(sarama.MetadataResponse)
+	mdr := new(MetadataResponse)
 	mdr.AddBroker(k.mb2.Addr(), k.mb2.BrokerID())
-	mdr.AddTopicPartition(k.topic, 0, k.mb2.BrokerID(), nil, nil, sarama.ErrNoError)
+	mdr.AddTopicPartition(k.topic, 0, k.mb2.BrokerID(), nil, nil, ErrNoError)
 	k.mb1.Returns(mdr)
 }
 
@@ -88,15 +88,15 @@ func MockMsg(msg []byte, topic string, partition int32, offset int64, b *sarama.
 }
 
 func (k *MockKafka) Msg(msg []byte) {
-	fr := new(sarama.FetchResponse)
+	fr := new(FetchResponse)
 	fr.AddMessage(k.topic, 0, nil, sarama.ByteEncoder(msg), k.offset)
 	k.offset++
 	k.mb2.Returns(fr)
 }
 
 func (k *MockKafka) MsgStr(msg string) {
-	fr := new(sarama.FetchResponse)
-	fr.AddMessage(k.topic, 0, nil, sarama.StringEncoder(msg), k.offset)
+	fr := new(FetchResponse)
+	fr.AddMessage(k.topic, 0, nil, StringEncoder(msg), k.offset)
 	k.offset++
 	k.mb2.Returns(fr)
 }
