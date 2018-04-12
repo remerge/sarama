@@ -16,5 +16,5 @@ func TestSimpleTopicAndBrokerUsage(t *testing.T) {
 	require.True(t, subject.Available())
 	require.False(t, subject.IsEmpty())
 	require.Equal(t, subject.FirstBrokers(), "localhost:9092")
-	require.Equal(t, subject.FirstTopic(), "test")
+	require.Equal(t, len(subject), 2)
 }
