@@ -1,7 +1,5 @@
 package sarama
 
-// TODO MOVE TO REX
-
 import (
 	"testing"
 	"time"
