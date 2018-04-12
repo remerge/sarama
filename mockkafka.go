@@ -5,8 +5,6 @@ package sarama
 import (
 	"testing"
 	"time"
-
-	"github.com/Shopify/sarama"
 )
 
 func Terminated(ms time.Duration, f func(), terminator func()) bool {
@@ -74,22 +72,22 @@ func (k *MockKafka) Addr() string {
 	return k.mb1.Addr()
 }
 
-func MockMsgAddId(id []byte, topic string, partition int32, offset int64, b *sarama.MockBroker) {
+func MockMsgAddId(id []byte, topic string, partition int32, offset int64, b *MockBroker) {
 	msg := make([]byte, 21)
 	copy(msg[1:], id)
 	msg[0] = 1 // insert
 	MockMsg(msg, topic, partition, offset, b)
 }
 
-func MockMsg(msg []byte, topic string, partition int32, offset int64, b *sarama.MockBroker) {
-	fr := new(sarama.FetchResponse)
-	fr.AddMessage(topic, partition, nil, sarama.ByteEncoder(msg), offset)
+func MockMsg(msg []byte, topic string, partition int32, offset int64, b *MockBroker) {
+	fr := new(FetchResponse)
+	fr.AddMessage(topic, partition, nil, ByteEncoder(msg), offset)
 	b.Returns(fr)
 }
 
 func (k *MockKafka) Msg(msg []byte) {
 	fr := new(FetchResponse)
-	fr.AddMessage(k.topic, 0, nil, sarama.ByteEncoder(msg), k.offset)
+	fr.AddMessage(k.topic, 0, nil, ByteEncoder(msg), k.offset)
 	k.offset++
 	k.mb2.Returns(fr)
 }
