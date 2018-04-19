@@ -20,8 +20,8 @@ const (
 )
 
 var (
-	kafkaAvailable, kafkaRequired bool
-	kafkaBrokers                  []string
+	kafkaAvailable bool
+	kafkaBrokers   []string
 
 	proxyClient  *toxiproxy.Client
 	Proxies      map[string]*toxiproxy.Proxy
@@ -58,17 +58,13 @@ func init() {
 			kafkaAvailable = true
 		}
 	}
-
-	kafkaRequired = os.Getenv("CI") != ""
 }
 
 func checkKafkaAvailability(t testing.TB) {
 	if !kafkaAvailable {
-		if kafkaRequired {
-			t.Fatalf("Kafka broker is not available on %s. Set KAFKA_PEERS to connect to Kafka on a different location.", kafkaBrokers[0])
-		} else {
-			t.Skipf("Kafka broker is not available on %s. Set KAFKA_PEERS to connect to Kafka on a different location.", kafkaBrokers[0])
-		}
+		t.Fatalf("Kafka broker is not available on %s. Set KAFKA_PEERS to connect to Kafka on a different location.", kafkaBrokers[0])
+	} else {
+		t.Skipf("Kafka broker is not available on %s. Set KAFKA_PEERS to connect to Kafka on a different location.", kafkaBrokers[0])
 	}
 }
 
