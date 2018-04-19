@@ -3,6 +3,8 @@ package sarama
 import (
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/require"
 )
 
 func collectMessages(t *testing.T, c <-chan *ConsumerMessage, count int) []string {
@@ -31,14 +33,7 @@ func collectMessages(t *testing.T, c <-chan *ConsumerMessage, count int) []strin
 
 func safeProduceStringMsg(t *testing.T, p SyncProducer, topic, msg string, partition int32) {
 	_, _, err := p.SendMessage(&ProducerMessage{Topic: topic, Value: StringEncoder(msg), Partition: partition})
-	failOnErr(t, err)
-}
-
-func failOnErr(t *testing.T, err error) {
-	if err != nil {
-		t.Error(err)
-		t.FailNow()
-	}
+	require.Nil(t, err)
 }
 
 func TestTopicConsumer(t *testing.T) {
@@ -49,10 +44,10 @@ func TestTopicConsumer(t *testing.T) {
 	brokers := []string{"localhost:9092", "localhost:9091"}
 
 	client, err := NewClient(brokers, conf)
-	failOnErr(t, err)
+	require.Nil(t, err)
 
 	p, err := NewSyncProducerFromClient(client)
-	failOnErr(t, err)
+	require.Nil(t, err)
 
 	safeProduceStringMsg(t, p, "test", "msg1", 1)
 	safeProduceStringMsg(t, p, "test", "msg2", 0)
@@ -61,7 +56,7 @@ func TestTopicConsumer(t *testing.T) {
 	p.Close()
 
 	consumer, err := NewTopicConsumer(client, "test", make(map[int32]int64), false)
-	failOnErr(t, err)
+	require.Nil(t, err)
 
 	messages := collectMessages(t, consumer.Messages(), 4)
 
@@ -80,7 +75,7 @@ func TestTopicConsumer(t *testing.T) {
 		}
 	}
 
-	failOnErr(t, consumer.Close())
+	require.Nil(t, consumer.Close())
 }
 
 func TestTopicConsumerSettingOffsets(t *testing.T) {
@@ -90,16 +85,16 @@ func TestTopicConsumerSettingOffsets(t *testing.T) {
 	conf.Producer.Return.Successes = true
 	brokers := []string{"localhost:9092", "localhost:9091"}
 	client, err := NewClient(brokers, conf)
-	failOnErr(t, err)
+	require.Nil(t, err)
 
 	p, err := NewSyncProducerFromClient(client)
-	failOnErr(t, err)
+	require.Nil(t, err)
 
 	safeProduceStringMsg(t, p, "test", "msg1", 1)
 	safeProduceStringMsg(t, p, "test", "msg2", 0)
 	safeProduceStringMsg(t, p, "test", "msg3", 1)
 	safeProduceStringMsg(t, p, "test", "msg4", 1)
-	failOnErr(t, p.Close())
+	require.Nil(t, p.Close())
 
 	offsets := map[int32]int64{
 		0: 1,
@@ -107,7 +102,7 @@ func TestTopicConsumerSettingOffsets(t *testing.T) {
 	}
 
 	consumer, err := NewTopicConsumer(client, "test", offsets, false)
-	failOnErr(t, err)
+	require.Nil(t, err)
 
 	messages := collectMessages(t, consumer.Messages(), 2)
 
@@ -126,5 +121,5 @@ func TestTopicConsumerSettingOffsets(t *testing.T) {
 		}
 	}
 
-	failOnErr(t, consumer.Close())
+	require.Nil(t, consumer.Close())
 }
