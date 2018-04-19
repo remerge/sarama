@@ -63,8 +63,6 @@ func init() {
 func checkKafkaAvailability(t testing.TB) {
 	if !kafkaAvailable {
 		t.Fatalf("Kafka broker is not available on %s. Set KAFKA_PEERS to connect to Kafka on a different location.", kafkaBrokers[0])
-	} else {
-		t.Skipf("Kafka broker is not available on %s. Set KAFKA_PEERS to connect to Kafka on a different location.", kafkaBrokers[0])
 	}
 }
 

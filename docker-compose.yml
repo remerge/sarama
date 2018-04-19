@@ -5,16 +5,72 @@ services:
     image: shopify/toxiproxy
     ports:
       - "8474:8474"
-  zookeeper:
+  zookeeper1:
     image: wurstmeister/zookeeper
     ports:
       - "2181:2181"
-  kafka:
+  zookeeper2:
+    image: wurstmeister/zookeeper
+    ports:
+      - "2182:2182"
+  zookeeper3:
+    image: wurstmeister/zookeeper
+    ports:
+      - "2183:2183"
+  zookeeper4:
+    image: wurstmeister/zookeeper
+    ports:
+      - "2184:2184"
+  zookeeper5:
+    image: wurstmeister/zookeeper
+    ports:
+      - "2185:2185"
+  kafka1:
+    image: wurstmeister/kafka
+    ports:
+      - "9091:9091"
+    depends_on:
+      zookeeper1:
+        condition: service_started
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_HOST_NAME: localhost
+  kafka2:
     image: wurstmeister/kafka
     ports:
       - "9092:9092"
     depends_on:
-      zookeeper:
+      zookeeper1:
+        condition: service_started
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_HOST_NAME: localhost
+  kafka3:
+    image: wurstmeister/kafka
+    ports:
+      - "9093:9093"
+    depends_on:
+      zookeeper1:
+        condition: service_started
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_HOST_NAME: localhost
+  kafka4:
+    image: wurstmeister/kafka
+    ports:
+      - "9094:9094"
+    depends_on:
+      zookeeper1:
+        condition: service_started
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_HOST_NAME: localhost
+  kafka5:
+    image: wurstmeister/kafka
+    ports:
+      - "9095:9095"
+    depends_on:
+      zookeeper1:
         condition: service_started
     environment:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
