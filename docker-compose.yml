@@ -33,7 +33,7 @@ services:
       zookeeper1:
         condition: service_started
     environment:
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper1:2181
       KAFKA_ADVERTISED_HOST_NAME: localhost
   kafka2:
     image: wurstmeister/kafka
@@ -43,7 +43,7 @@ services:
       zookeeper1:
         condition: service_started
     environment:
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper1:2181
       KAFKA_ADVERTISED_HOST_NAME: localhost
   kafka3:
     image: wurstmeister/kafka
@@ -53,7 +53,7 @@ services:
       zookeeper1:
         condition: service_started
     environment:
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper1:2181
       KAFKA_ADVERTISED_HOST_NAME: localhost
   kafka4:
     image: wurstmeister/kafka
@@ -63,7 +63,7 @@ services:
       zookeeper1:
         condition: service_started
     environment:
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper1:2181
       KAFKA_ADVERTISED_HOST_NAME: localhost
   kafka5:
     image: wurstmeister/kafka
@@ -73,5 +73,5 @@ services:
       zookeeper1:
         condition: service_started
     environment:
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper1:2181
       KAFKA_ADVERTISED_HOST_NAME: localhost
