@@ -20,5 +20,6 @@ install:
 
 script:
 - make test
+- docker-compose logs
 
 sudo: true
