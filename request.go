@@ -113,7 +113,7 @@ func allocateBody(key, version int16) protocolBody {
 	case apiKeyOffsetFetch:
 		return &OffsetFetchRequest{}
 	case apiKeyFindCoordinator:
-		return &ConsumerMetadataRequest{}
+		return &FindCoordinatorRequest{}
 	case apiKeyJoinGroup:
 		return &JoinGroupRequest{}
 	case apiKeyHeartbeat:
@@ -130,6 +130,34 @@ func allocateBody(key, version int16) protocolBody {
 		return &SaslHandshakeRequest{}
 	case apiKeyApiVersions:
 		return &ApiVersionsRequest{}
+	case 19:
+		return &CreateTopicsRequest{}
+	case 20:
+		return &DeleteTopicsRequest{}
+	case 21:
+		return &DeleteRecordsRequest{}
+	case 22:
+		return &InitProducerIDRequest{}
+	case 24:
+		return &AddPartitionsToTxnRequest{}
+	case 25:
+		return &AddOffsetsToTxnRequest{}
+	case 26:
+		return &EndTxnRequest{}
+	case 28:
+		return &TxnOffsetCommitRequest{}
+	case 29:
+		return &DescribeAclsRequest{}
+	case 30:
+		return &CreateAclsRequest{}
+	case 31:
+		return &DeleteAclsRequest{}
+	case 32:
+		return &DescribeConfigsRequest{}
+	case 33:
+		return &AlterConfigsRequest{}
+	case 37:
+		return &CreatePartitionsRequest{}
 	}
 	return nil
 }

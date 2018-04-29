@@ -1,12 +1,13 @@
 language: go
 go:
-- 1.9.2
+- 1.8.x
+- 1.9.x
+- 1.10.x
 
 services:
  - docker
 
-install:
-- make install_dependencies
+install: make install_dependencies
 
 script:
 - make test
