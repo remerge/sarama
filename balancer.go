@@ -53,7 +53,7 @@ const (
 	StrategyRoundRobin Strategy = "roundrobin"
 )
 
-type TopicPartition struct {
+type TopicWithPartition struct {
 	Topic     string
 	Partition int32
 }
