@@ -260,7 +260,7 @@ func (b *MockBroker) getRequestType(req *request) int {
 		return apiKeyOffsetCommit
 	case *OffsetFetchRequest:
 		return apiKeyOffsetFetch
-	case *ConsumerMetadataRequest:
+	case *FindCoordinatorRequest:
 		return apiKeyFindCoordinator
 	case *JoinGroupRequest:
 		return apiKeyJoinGroup
