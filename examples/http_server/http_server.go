@@ -1,8 +1,6 @@
 package main
 
 import (
-	"github.com/Shopify/sarama"
-
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/json"
@@ -14,6 +12,8 @@ import (
 	"os"
 	"strings"
 	"time"
+
+	"github.com/Shopify/sarama"
 )
 
 var (
