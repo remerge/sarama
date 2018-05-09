@@ -35,3 +35,11 @@ get:
 watch:
 	go get github.com/cespare/reflex
 	reflex -r '\.go$$' -s -- sh -c 'clear && go test -v -run=Test$(T)'
+
+switchRemerge:
+	go get github.com/novalagung/gorep
+	gorep -path="$$GOPATH/src/github.com/remerge/sarama" -from="github.com/Shopify/sarama" -to="github.com/remerge/sarama"
+
+switchShopify:
+	go get github.com/novalagung/gorep
+	gorep -path="$$GOPATH/src/github.com/remerge/sarama" -from="github.com/remerge/sarama" -to="github.com/Shopify/sarama"

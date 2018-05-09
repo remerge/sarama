@@ -6,13 +6,10 @@ go:
 services:
  - docker
 
-before_install:
-- export REPOSITORY_ROOT=${TRAVIS_BUILD_DIR}
-
 install:
 - make install_dependencies
 
 script:
-- make test
+- make switchRemerge test
 
 sudo: true
