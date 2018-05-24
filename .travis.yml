@@ -1,6 +1,7 @@
 language: go
 go:
-- 1.9.2
+- 1.9.x
+- 1.10.x
 
 services:
  - docker
@@ -9,6 +10,6 @@ install:
 - make install_dependencies
 
 script:
-- make test
+- make switchRemergeDep test
 
 sudo: true

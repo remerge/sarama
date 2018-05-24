@@ -53,7 +53,7 @@ type consumerGroup struct {
 
 	consumer Consumer
 	om       OffsetManager
-	managed  map[TopicPartition]*managedPartition
+	managed  map[TopicWithPartition]*managedPartition
 
 	topics       []string
 	group        string
@@ -98,7 +98,7 @@ func NewConsumerGroupFromClient(client Client, group string, topics []string) (C
 		errors:        make(chan error),
 		messages:      make(chan *ConsumerMessage, client.Config().ChannelBufferSize),
 		notifications: make(chan *Notification, 1),
-		managed:       make(map[TopicPartition]*managedPartition),
+		managed:       make(map[TopicWithPartition]*managedPartition),
 	}
 
 	// we could make this nicer as it break encapsulation
@@ -160,7 +160,7 @@ func (cg *consumerGroup) MarkMessage(msg *ConsumerMessage, metadata string) {
 
 func (cg *consumerGroup) MarkOffset(topic string, partition int32, offset int64, metadata string) {
 	cg.RLock()
-	if mp := cg.managed[TopicPartition{topic, partition}]; mp != nil {
+	if mp := cg.managed[TopicWithPartition{topic, partition}]; mp != nil {
 		mp.pom.MarkOffset(offset, metadata)
 	}
 	cg.RUnlock()
@@ -168,7 +168,7 @@ func (cg *consumerGroup) MarkOffset(topic string, partition int32, offset int64,
 
 func (cg *consumerGroup) ResetOffset(topic string, partition int32, offset int64, metadata string) {
 	cg.RLock()
-	if mp := cg.managed[TopicPartition{topic, partition}]; mp != nil {
+	if mp := cg.managed[TopicWithPartition{topic, partition}]; mp != nil {
 		mp.pom.ResetOffset(offset, metadata)
 	}
 	cg.RUnlock()
@@ -265,7 +265,7 @@ func (cg *consumerGroup) createConsumer(topic string, partition int32) error {
 	go fwder.forwardTo(cg.messages, cg.errors)
 
 	cg.Lock()
-	cg.managed[TopicPartition{topic, partition}] = &managedPartition{
+	cg.managed[TopicWithPartition{topic, partition}] = &managedPartition{
 		fwd: fwder,
 		pc:  pc,
 		pom: pom,
@@ -403,7 +403,7 @@ func (cg *consumerGroup) release() (err error) {
 	// clear all by recreating the map
 	cg.Lock()
 	defer cg.Unlock()
-	cg.managed = make(map[TopicPartition]*managedPartition)
+	cg.managed = make(map[TopicWithPartition]*managedPartition)
 
 	return
 }

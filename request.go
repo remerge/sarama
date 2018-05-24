@@ -82,21 +82,23 @@ func decodeRequest(r io.Reader) (req *request, bytesRead int, err error) {
 	return req, bytesRead, nil
 }
 
-const apiKeyProduce = 0
-const apiKeyFetch = 1
-const apiKeyListOffsets = 2
-const apiKeyMetadata = 3
-const apiKeyOffsetCommit = 8
-const apiKeyOffsetFetch = 9
-const apiKeyFindCoordinator = 10
-const apiKeyJoinGroup = 11
-const apiKeyHeartbeat = 12
-const apiKeyLeaveGroup = 13
-const apiKeySyncGroup = 14
-const apiKeyDescribeGroups = 15
-const apiKeyListGroups = 16
-const apiKeySaslHandshake = 17
-const apiKeyApiVersions = 18
+const (
+	apiKeyProduce         = 0
+	apiKeyFetch           = 1
+	apiKeyListOffsets     = 2
+	apiKeyMetadata        = 3
+	apiKeyOffsetCommit    = 8
+	apiKeyOffsetFetch     = 9
+	apiKeyFindCoordinator = 10
+	apiKeyJoinGroup       = 11
+	apiKeyHeartbeat       = 12
+	apiKeyLeaveGroup      = 13
+	apiKeySyncGroup       = 14
+	apiKeyDescribeGroups  = 15
+	apiKeyListGroups      = 16
+	apiKeySaslHandshake   = 17
+	apiKeyApiVersions     = 18
+)
 
 func allocateBody(key, version int16) protocolBody {
 	switch key {
@@ -113,7 +115,7 @@ func allocateBody(key, version int16) protocolBody {
 	case apiKeyOffsetFetch:
 		return &OffsetFetchRequest{}
 	case apiKeyFindCoordinator:
-		return &ConsumerMetadataRequest{}
+		return &FindCoordinatorRequest{}
 	case apiKeyJoinGroup:
 		return &JoinGroupRequest{}
 	case apiKeyHeartbeat:
@@ -130,6 +132,34 @@ func allocateBody(key, version int16) protocolBody {
 		return &SaslHandshakeRequest{}
 	case apiKeyApiVersions:
 		return &ApiVersionsRequest{}
+	case 19:
+		return &CreateTopicsRequest{}
+	case 20:
+		return &DeleteTopicsRequest{}
+	case 21:
+		return &DeleteRecordsRequest{}
+	case 22:
+		return &InitProducerIDRequest{}
+	case 24:
+		return &AddPartitionsToTxnRequest{}
+	case 25:
+		return &AddOffsetsToTxnRequest{}
+	case 26:
+		return &EndTxnRequest{}
+	case 28:
+		return &TxnOffsetCommitRequest{}
+	case 29:
+		return &DescribeAclsRequest{}
+	case 30:
+		return &CreateAclsRequest{}
+	case 31:
+		return &DeleteAclsRequest{}
+	case 32:
+		return &DescribeConfigsRequest{}
+	case 33:
+		return &AlterConfigsRequest{}
+	case 37:
+		return &CreatePartitionsRequest{}
 	}
 	return nil
 }

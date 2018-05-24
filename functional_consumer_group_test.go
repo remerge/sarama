@@ -102,7 +102,7 @@ func TestFunctionalConsumerGroup(t *testing.T) {
 	<-cg.Notifications()
 
 	for i := 0; i < 4; i++ {
-		next, _ := cg.(*consumerGroup).managed[TopicPartition{"test.4", int32(i)}].pom.NextOffset()
+		next, _ := cg.(*consumerGroup).managed[TopicWithPartition{"test.4", int32(i)}].pom.NextOffset()
 		if next != offsets[i]+1 {
 			t.Errorf("offset was not properly commited. got %d expected %d partition=%d", next, offsets[i], i)
 		}
