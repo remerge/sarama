@@ -29,7 +29,18 @@ func (cb *TopicAndBroker) Set(value string) error {
 	return nil
 }
 
-// FirstBrokers return first broker or empty string
+// First return the first topic and brokers pair
+func (cb *TopicAndBroker) First() (string, string) {
+	if cb.IsEmpty() {
+		return "", ""
+	}
+	for k, v := range *cb {
+		return k, v
+	}
+	return "", ""
+}
+
+// FirstBrokers return first broker(s) as one string or an empty string
 func (cb *TopicAndBroker) FirstBrokers() string {
 	if cb.IsEmpty() {
 		return ""
@@ -38,6 +49,11 @@ func (cb *TopicAndBroker) FirstBrokers() string {
 		return v
 	}
 	return ""
+}
+
+// FirstBrokers return first broker(s) split into a slice of strings
+func (cb *TopicAndBroker) FirstBrokersSplit() []string {
+	return strings.Split(cb.FirstBrokers(), ",")
 }
 
 // FirstTopic return first topic or empty string
