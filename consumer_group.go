@@ -664,7 +664,7 @@ type forwarder struct {
 	msgs   <-chan *ConsumerMessage
 	errors <-chan *ConsumerError
 
-	closed      bool
+	closed      uint32
 	dying, dead chan none
 }
 
@@ -708,10 +708,9 @@ func (f *forwarder) forwardTo(messages chan<- *ConsumerMessage, errors chan<- er
 }
 
 func (f *forwarder) Close() {
-	if f.closed {
+	if !atomic.CompareAndSwapUint32(&f.closed, 0, 1) {
 		return
 	}
-	f.closed = true
 	close(f.dying)
 	<-f.dead
 }
