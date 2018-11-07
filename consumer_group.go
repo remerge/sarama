@@ -157,10 +157,16 @@ func (cg *consumerGroup) Notifications() <-chan *Notification { return cg.notifi
 // your application crashes. This means that you may end up processing the same
 // message twice, and your processing should ideally be idempotent.
 func (cg *consumerGroup) MarkMessage(msg *ConsumerMessage, metadata string) {
+	if atomic.LoadUint32(&cg.closeFlag) == 1 {
+		return
+	}
 	cg.MarkOffset(msg.Topic, msg.Partition, msg.Offset+1, metadata)
 }
 
 func (cg *consumerGroup) MarkOffset(topic string, partition int32, offset int64, metadata string) {
+	if atomic.LoadUint32(&cg.closeFlag) == 1 {
+		return
+	}
 	cg.RLock()
 	if mp := cg.managed[TopicWithPartition{topic, partition}]; mp != nil {
 		mp.pom.MarkOffset(offset, metadata)
@@ -169,6 +175,9 @@ func (cg *consumerGroup) MarkOffset(topic string, partition int32, offset int64,
 }
 
 func (cg *consumerGroup) ResetOffset(topic string, partition int32, offset int64, metadata string) {
+	if atomic.LoadUint32(&cg.closeFlag) == 1 {
+		return
+	}
 	cg.RLock()
 	if mp := cg.managed[TopicWithPartition{topic, partition}]; mp != nil {
 		mp.pom.ResetOffset(offset, metadata)
@@ -178,6 +187,9 @@ func (cg *consumerGroup) ResetOffset(topic string, partition int32, offset int64
 
 // commits marked offsets
 func (cg *consumerGroup) Commit() {
+	if atomic.LoadUint32(&cg.closeFlag) == 1 {
+		return
+	}
 	cg.om.Commit()
 }
 
