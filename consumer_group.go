@@ -356,6 +356,8 @@ func (cg *consumerGroup) heartbeatLoop(stop <-chan struct{}, done chan<- struct{
 				cg.handleError(fmt.Errorf("heartbeat broken: %v", err))
 				return
 			}
+		case <-cg.dying:
+			return
 		case <-stop:
 			return
 		}
