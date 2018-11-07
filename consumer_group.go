@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sort"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -63,6 +64,7 @@ type consumerGroup struct {
 
 	dying, dead chan none
 	closed      bool
+	closeFlag   uint32
 
 	messages      chan *ConsumerMessage
 	notifications chan *Notification
@@ -193,7 +195,7 @@ func (cg *consumerGroup) log(f string, a ...interface{}) {
 
 // Close safely closes the consumer and releases all resources
 func (cg *consumerGroup) Close() (err error) {
-	if cg.closed {
+	if !atomic.CompareAndSwapUint32(&cg.closeFlag, 0, 1) {
 		return
 	}
 	cg.log("closing")
@@ -222,7 +224,6 @@ func (cg *consumerGroup) Close() (err error) {
 		}
 	}
 	cg.log("closed")
-	cg.closed = true
 	return
 }
 
