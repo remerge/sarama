@@ -63,8 +63,7 @@ type consumerGroup struct {
 	generationID int32
 
 	dying, dead chan none
-	closed      bool
-	closeFlag   uint32
+	closed      uint32
 
 	messages      chan *ConsumerMessage
 	notifications chan *Notification
@@ -157,14 +156,14 @@ func (cg *consumerGroup) Notifications() <-chan *Notification { return cg.notifi
 // your application crashes. This means that you may end up processing the same
 // message twice, and your processing should ideally be idempotent.
 func (cg *consumerGroup) MarkMessage(msg *ConsumerMessage, metadata string) {
-	if atomic.LoadUint32(&cg.closeFlag) == 1 {
+	if atomic.LoadUint32(&cg.closed) == 1 {
 		return
 	}
 	cg.MarkOffset(msg.Topic, msg.Partition, msg.Offset+1, metadata)
 }
 
 func (cg *consumerGroup) MarkOffset(topic string, partition int32, offset int64, metadata string) {
-	if atomic.LoadUint32(&cg.closeFlag) == 1 {
+	if atomic.LoadUint32(&cg.closed) == 1 {
 		return
 	}
 	cg.RLock()
@@ -175,7 +174,7 @@ func (cg *consumerGroup) MarkOffset(topic string, partition int32, offset int64,
 }
 
 func (cg *consumerGroup) ResetOffset(topic string, partition int32, offset int64, metadata string) {
-	if atomic.LoadUint32(&cg.closeFlag) == 1 {
+	if atomic.LoadUint32(&cg.closed) == 1 {
 		return
 	}
 	cg.RLock()
@@ -187,7 +186,7 @@ func (cg *consumerGroup) ResetOffset(topic string, partition int32, offset int64
 
 // commits marked offsets
 func (cg *consumerGroup) Commit() {
-	if atomic.LoadUint32(&cg.closeFlag) == 1 {
+	if atomic.LoadUint32(&cg.closed) == 1 {
 		return
 	}
 	cg.om.Commit()
@@ -207,7 +206,7 @@ func (cg *consumerGroup) log(f string, a ...interface{}) {
 
 // Close safely closes the consumer and releases all resources
 func (cg *consumerGroup) Close() (err error) {
-	if !atomic.CompareAndSwapUint32(&cg.closeFlag, 0, 1) {
+	if !atomic.CompareAndSwapUint32(&cg.closed, 0, 1) {
 		return
 	}
 	cg.log("closing")
