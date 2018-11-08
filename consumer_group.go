@@ -291,6 +291,10 @@ func (cg *consumerGroup) mainLoop() {
 	defer close(cg.dead)
 
 	for {
+		if atomic.LoadUint32(&cg.closed) == 1 {
+			return
+		}
+
 		var notification *Notification
 		if cg.client.Config().Group.Return.Notifications {
 			m := make(map[string][]int32)
