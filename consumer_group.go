@@ -131,6 +131,10 @@ func NewConsumerGroup(addrs []string, group string, topics []string, config *Con
 	return cg, nil
 }
 
+func (cg *consumerGroup) isClosed() bool {
+	return atomic.LoadUint32(&cg.closed) == 1
+}
+
 // Messages returns the read channel for the messages that are returned by
 // the broker.
 func (cg *consumerGroup) Messages() <-chan *ConsumerMessage { return cg.messages }
@@ -156,40 +160,36 @@ func (cg *consumerGroup) Notifications() <-chan *Notification { return cg.notifi
 // your application crashes. This means that you may end up processing the same
 // message twice, and your processing should ideally be idempotent.
 func (cg *consumerGroup) MarkMessage(msg *ConsumerMessage, metadata string) {
-	if atomic.LoadUint32(&cg.closed) == 1 {
-		return
+	if !cg.isClosed() {
+		cg.MarkOffset(msg.Topic, msg.Partition, msg.Offset+1, metadata)
 	}
-	cg.MarkOffset(msg.Topic, msg.Partition, msg.Offset+1, metadata)
 }
 
 func (cg *consumerGroup) MarkOffset(topic string, partition int32, offset int64, metadata string) {
-	if atomic.LoadUint32(&cg.closed) == 1 {
-		return
+	if !cg.isClosed() {
+		cg.RLock()
+		if mp := cg.managed[TopicWithPartition{topic, partition}]; mp != nil {
+			mp.pom.MarkOffset(offset, metadata)
+		}
+		cg.RUnlock()
 	}
-	cg.RLock()
-	if mp := cg.managed[TopicWithPartition{topic, partition}]; mp != nil {
-		mp.pom.MarkOffset(offset, metadata)
-	}
-	cg.RUnlock()
 }
 
 func (cg *consumerGroup) ResetOffset(topic string, partition int32, offset int64, metadata string) {
-	if atomic.LoadUint32(&cg.closed) == 1 {
-		return
+	if !cg.isClosed() {
+		cg.RLock()
+		if mp := cg.managed[TopicWithPartition{topic, partition}]; mp != nil {
+			mp.pom.ResetOffset(offset, metadata)
+		}
+		cg.RUnlock()
 	}
-	cg.RLock()
-	if mp := cg.managed[TopicWithPartition{topic, partition}]; mp != nil {
-		mp.pom.ResetOffset(offset, metadata)
-	}
-	cg.RUnlock()
 }
 
 // commits marked offsets
 func (cg *consumerGroup) Commit() {
-	if atomic.LoadUint32(&cg.closed) == 1 {
-		return
+	if !cg.isClosed() {
+		cg.om.Commit()
 	}
-	cg.om.Commit()
 }
 
 func (cg *consumerGroup) log(f string, a ...interface{}) {
@@ -207,8 +207,10 @@ func (cg *consumerGroup) log(f string, a ...interface{}) {
 // Close safely closes the consumer and releases all resources
 func (cg *consumerGroup) Close() (err error) {
 	if !atomic.CompareAndSwapUint32(&cg.closed, 0, 1) {
+		// close once
 		return
 	}
+
 	cg.log("closing")
 
 	close(cg.dying)
@@ -291,7 +293,7 @@ func (cg *consumerGroup) mainLoop() {
 	defer close(cg.dead)
 
 	for {
-		if atomic.LoadUint32(&cg.closed) == 1 {
+		if cg.isClosed() {
 			return
 		}
 
