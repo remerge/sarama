@@ -606,22 +606,22 @@ func (cg *consumerGroup) syncGroup(req *SyncGroupRequest) (map[string][]int32, e
 		return nil, err
 	}
 	cg.log("sync group request generation=%d", cg.generationID)
-	sync, err := broker.SyncGroup(req)
+	syncRes, err := broker.SyncGroup(req)
 	if err != nil {
 		cg.closeCoordinator(broker, err)
 		return nil, err
-	} else if sync.Err != ErrNoError {
-		cg.closeCoordinator(broker, sync.Err)
-		return nil, sync.Err
+	} else if syncRes.Err != ErrNoError {
+		cg.closeCoordinator(broker, syncRes.Err)
+		return nil, syncRes.Err
 	}
 
 	// Return if there is nothing to subcribe to
-	if len(sync.MemberAssignment) == 0 {
+	if len(syncRes.MemberAssignment) == 0 {
 		return nil, nil
 	}
 
 	// Get assigned subscriptions
-	members, err := sync.GetMemberAssignment()
+	members, err := syncRes.GetMemberAssignment()
 	if err != nil {
 		return nil, err
 	}
