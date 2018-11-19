@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sort"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -62,7 +63,7 @@ type consumerGroup struct {
 	generationID int32
 
 	dying, dead chan none
-	closed      bool
+	closed      uint32
 
 	messages      chan *ConsumerMessage
 	notifications chan *Notification
@@ -130,6 +131,10 @@ func NewConsumerGroup(addrs []string, group string, topics []string, config *Con
 	return cg, nil
 }
 
+func (cg *consumerGroup) isClosed() bool {
+	return atomic.LoadUint32(&cg.closed) == 1
+}
+
 // Messages returns the read channel for the messages that are returned by
 // the broker.
 func (cg *consumerGroup) Messages() <-chan *ConsumerMessage { return cg.messages }
@@ -155,28 +160,36 @@ func (cg *consumerGroup) Notifications() <-chan *Notification { return cg.notifi
 // your application crashes. This means that you may end up processing the same
 // message twice, and your processing should ideally be idempotent.
 func (cg *consumerGroup) MarkMessage(msg *ConsumerMessage, metadata string) {
-	cg.MarkOffset(msg.Topic, msg.Partition, msg.Offset+1, metadata)
+	if !cg.isClosed() {
+		cg.MarkOffset(msg.Topic, msg.Partition, msg.Offset+1, metadata)
+	}
 }
 
 func (cg *consumerGroup) MarkOffset(topic string, partition int32, offset int64, metadata string) {
-	cg.RLock()
-	if mp := cg.managed[TopicWithPartition{topic, partition}]; mp != nil {
-		mp.pom.MarkOffset(offset, metadata)
+	if !cg.isClosed() {
+		cg.RLock()
+		if mp := cg.managed[TopicWithPartition{topic, partition}]; mp != nil {
+			mp.pom.MarkOffset(offset, metadata)
+		}
+		cg.RUnlock()
 	}
-	cg.RUnlock()
 }
 
 func (cg *consumerGroup) ResetOffset(topic string, partition int32, offset int64, metadata string) {
-	cg.RLock()
-	if mp := cg.managed[TopicWithPartition{topic, partition}]; mp != nil {
-		mp.pom.ResetOffset(offset, metadata)
+	if !cg.isClosed() {
+		cg.RLock()
+		if mp := cg.managed[TopicWithPartition{topic, partition}]; mp != nil {
+			mp.pom.ResetOffset(offset, metadata)
+		}
+		cg.RUnlock()
 	}
-	cg.RUnlock()
 }
 
 // commits marked offsets
 func (cg *consumerGroup) Commit() {
-	cg.om.Commit()
+	if !cg.isClosed() {
+		cg.om.Commit()
+	}
 }
 
 func (cg *consumerGroup) log(f string, a ...interface{}) {
@@ -193,9 +206,11 @@ func (cg *consumerGroup) log(f string, a ...interface{}) {
 
 // Close safely closes the consumer and releases all resources
 func (cg *consumerGroup) Close() (err error) {
-	if cg.closed {
+	if !atomic.CompareAndSwapUint32(&cg.closed, 0, 1) {
+		// close once
 		return
 	}
+
 	cg.log("closing")
 
 	close(cg.dying)
@@ -222,7 +237,6 @@ func (cg *consumerGroup) Close() (err error) {
 		}
 	}
 	cg.log("closed")
-	cg.closed = true
 	return
 }
 
@@ -279,6 +293,10 @@ func (cg *consumerGroup) mainLoop() {
 	defer close(cg.dead)
 
 	for {
+		if cg.isClosed() {
+			return
+		}
+
 		var notification *Notification
 		if cg.client.Config().Group.Return.Notifications {
 			m := make(map[string][]int32)
@@ -343,6 +361,8 @@ func (cg *consumerGroup) heartbeatLoop(stop <-chan struct{}, done chan<- struct{
 				cg.handleError(fmt.Errorf("heartbeat broken: %v", err))
 				return
 			}
+		case <-cg.dying:
+			return
 		case <-stop:
 			return
 		}
@@ -588,22 +608,22 @@ func (cg *consumerGroup) syncGroup(req *SyncGroupRequest) (map[string][]int32, e
 		return nil, err
 	}
 	cg.log("sync group request generation=%d", cg.generationID)
-	sync, err := broker.SyncGroup(req)
+	syncRes, err := broker.SyncGroup(req)
 	if err != nil {
 		cg.closeCoordinator(broker, err)
 		return nil, err
-	} else if sync.Err != ErrNoError {
-		cg.closeCoordinator(broker, sync.Err)
-		return nil, sync.Err
+	} else if syncRes.Err != ErrNoError {
+		cg.closeCoordinator(broker, syncRes.Err)
+		return nil, syncRes.Err
 	}
 
 	// Return if there is nothing to subcribe to
-	if len(sync.MemberAssignment) == 0 {
+	if len(syncRes.MemberAssignment) == 0 {
 		return nil, nil
 	}
 
 	// Get assigned subscriptions
-	members, err := sync.GetMemberAssignment()
+	members, err := syncRes.GetMemberAssignment()
 	if err != nil {
 		return nil, err
 	}
@@ -649,7 +669,7 @@ type forwarder struct {
 	msgs   <-chan *ConsumerMessage
 	errors <-chan *ConsumerError
 
-	closed      bool
+	closed      uint32
 	dying, dead chan none
 }
 
@@ -693,10 +713,9 @@ func (f *forwarder) forwardTo(messages chan<- *ConsumerMessage, errors chan<- er
 }
 
 func (f *forwarder) Close() {
-	if f.closed {
+	if !atomic.CompareAndSwapUint32(&f.closed, 0, 1) {
 		return
 	}
-	f.closed = true
 	close(f.dying)
 	<-f.dead
 }
