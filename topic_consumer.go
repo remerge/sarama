@@ -53,7 +53,10 @@ func NewTopicConsumer(client Client, topic string, offsets map[int32]int64, offs
 	}
 
 	for _, partition := range partitions {
-		consumer.initPartition(partition, offsets[partition])
+		err = consumer.initPartition(partition, offsets[partition])
+		if err != nil {
+			return nil, fmt.Errorf("Unable to init partition  %v: %v", partition, err)
+		}
 	}
 
 	return consumer, nil
