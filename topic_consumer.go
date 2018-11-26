@@ -87,7 +87,7 @@ func (sc *topicConsumer) initPartition(partition int32, offset int64) error {
 	}
 
 	if newestOffset < resumeFrom {
-		Logger.Printf("given offset for %v/%v is unavailable (newest < resume_from). Auto correcting to oldest available offset: resume_from=%v newest=%v", sc.topic, partition, resumeFrom, newestOffset)
+		Logger.Printf("given offset for %v/%v is unavailable (newest < resume_from). Auto correcting to newest available offset: resume_from=%v newest=%v", sc.topic, partition, resumeFrom, newestOffset)
 		resumeFrom = newestOffset
 	}
 
