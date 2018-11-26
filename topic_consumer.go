@@ -53,7 +53,10 @@ func NewTopicConsumer(client Client, topic string, offsets map[int32]int64, offs
 	}
 
 	for _, partition := range partitions {
-		consumer.initPartition(partition, offsets[partition])
+		err = consumer.initPartition(partition, offsets[partition])
+		if err != nil {
+			return nil, fmt.Errorf("Unable to init partition  %v: %v", partition, err)
+		}
 	}
 
 	return consumer, nil
@@ -84,7 +87,7 @@ func (sc *topicConsumer) initPartition(partition int32, offset int64) error {
 	}
 
 	if newestOffset < resumeFrom {
-		Logger.Printf("given offset for %v/%v is unavailable (newest < resume_from). Auto correcting to oldest available offset: resume_from=%v newest=%v", sc.topic, partition, resumeFrom, newestOffset)
+		Logger.Printf("given offset for %v/%v is unavailable (newest < resume_from). Auto correcting to newest available offset: resume_from=%v newest=%v", sc.topic, partition, resumeFrom, newestOffset)
 		resumeFrom = newestOffset
 	}
 
