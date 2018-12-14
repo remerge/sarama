@@ -504,7 +504,7 @@ func (child *partitionConsumer) parseMessages(msgSet *MessageSet) ([]*ConsumerMe
 		}
 	}
 	if len(messages) == 0 {
-		return nil, ErrIncompleteResponse
+		child.offset += 1
 	}
 	return messages, nil
 }
